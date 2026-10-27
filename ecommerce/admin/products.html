@@ -22,8 +22,9 @@
                 id="admin-signout">Sign out</button></header>
         <main class="content">
             <div class="page-head">
-                <h1>Products</h1><a class="btn btn-brand" href="product-form.html" id="add-product-btn">Add product</a>
+                <h1>Products</h1><div class="d-flex flex-wrap gap-2"><button class="btn btn-outline-brand" type="button" id="import-catalog-btn">Import store catalogue</button><a class="btn btn-brand" href="product-form.html" id="add-product-btn">Add product</a></div>
             </div>
+            <p class="small text-muted" id="import-catalog-status" role="status" aria-live="polite"></p>
             <div class="row g-3 mb-3" id="stock-summary"><!-- JS: fill these counts from Firebase -->
                 <div class="col-6 col-xl-3">
                     <div class="card-box stat">

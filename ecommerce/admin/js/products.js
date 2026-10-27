@@ -1,12 +1,15 @@
 import { db, stockStatus, naira, esc, imgSrc } from "./firebase-config.js";
 import { requireAdmin } from "./admin-session.js";
-import { collection, onSnapshot, query, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { CATALOG } from "../../client/js/catalog.js";
+import { collection, onSnapshot, getDocs, getDoc, setDoc, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 await requireAdmin();
 
 const body = document.getElementById("products-table-body");
 const empty = document.getElementById("products-empty");
 const filterForm = document.getElementById("product-filter-form");
+const importButton = document.getElementById("import-catalog-btn");
+const importStatus = document.getElementById("import-catalog-status");
 const pillClass = { Active: "pill-ok", "Low stock": "pill-wait", "Out of stock": "pill-bad", Draft: "pill-info" };
 let all = [];
 
@@ -37,9 +40,50 @@ function summary() {
   set("stat-total", all.length); set("stat-instock", c.Active); set("stat-low", c["Low stock"]); set("stat-out", c["Out of stock"]);
 }
 
+function timestamp(value) {
+  if (value && typeof value.toMillis === "function") return value.toMillis();
+  const parsed = value instanceof Date ? value.getTime() : Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
 
-onSnapshot(query(collection(db, "products"), orderBy("createdAt", "desc")),
-  snap => { all = snap.docs.map(d => ({ id: d.id, ...d.data() })); summary(); render(); },
+importButton.addEventListener("click", async () => {
+  importButton.disabled = true;
+  importStatus.textContent = "Checking the store catalogue...";
+  try {
+    const snapshot = await getDocs(collection(db, "products"));
+    const existing = snapshot.docs.map(product => product.data());
+    const missing = CATALOG.filter(item => !existing.some(product =>
+      (product.name || "").trim().toLowerCase() === item.name.toLowerCase() ||
+      (Array.isArray(product.images) ? product.images : []).includes(item.images[0])
+    ));
+
+    let imported = 0;
+    for (const item of missing) {
+      const ref = doc(db, "products", item.id);
+      if ((await getDoc(ref)).exists()) continue;
+      const { id, ...data } = item;
+      await setDoc(ref, { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+      imported++;
+    }
+
+    importStatus.textContent = imported
+      ? `Imported ${imported} missing store products.`
+      : "All store catalogue products are already in the admin list.";
+  } catch (error) {
+    console.error("Could not import store catalogue.", error);
+    importStatus.textContent = `Import failed: ${error.message}`;
+  } finally {
+    importButton.disabled = false;
+  }
+});
+
+onSnapshot(collection(db, "products"),
+  snap => {
+    all = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => timestamp(b.createdAt) - timestamp(a.createdAt));
+    summary();
+    render();
+  },
   err => {
     console.error(err);
     body.innerHTML = '<tr><td colspan="7" class="text-danger py-4">Could not load products. Check js/firebase-config.js and your Firestore rules.</td></tr>';
