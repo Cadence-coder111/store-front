@@ -36,60 +36,90 @@
                     <div class="col-12 auth-field">
                         <label for="pass" class="form-label">Password</label>
                         <input type="password" id="pass" class="form-control" autocomplete="new-password" placeholder="Create a password">
+                        <div class="form-text">At least 8 characters, with a letter and a number.</div>
                     </div>
                 </div>
                 <button class="btn btn-brand auth-submit" type="button" onclick="signUp()">Create account</button>
+                <div class="auth-divider"><span>or</span></div>
+                <button class="btn btn-outline-brand btn-google" type="button" id="google-btn"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7c-.5-1.5-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C1 16.4 0 20.1 0 24s1 7.6 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.900-5.8l-7.5-5.800c-2.100 1.400-4.800 2.3-8.400 2.300-6.300 0-11.600-4.100-13.500-9.800l-7.900 6.100C6.500 42.600 14.600 48 24 48z"/></svg>Sign up with Google</button>
                 <div id="show" class="auth-feedback" aria-live="polite"></div>
                 <p class="auth-switch">Already have an account? <a href="signIn.html">Sign in</a></p>
             </div>
         </section>
     </main>
+    <script type="module" src="js/auth.js"></script>
 </body>
 <script>
-    window.addEventListener('keypress', (e) => {
-    if (e.key == 'Enter') {
-        signUp()
-    }
-})
-    const userInfo = JSON.parse(localStorage.getItem('users')) || []
+    const getUsers = () => {
+        try {
+            const saved = JSON.parse(localStorage.getItem('users') || '[]');
+            return Array.isArray(saved) ? saved : [];
+        } catch (error) {
+            return [];
+        }
+    };
 
-    const signUp = () =>{
-        let firstName = document.getElementById('firstName').value
-        let lastName = document.getElementById('lastName').value
-        let email = document.getElementById('email').value
-        let pass = document.getElementById('pass').value
+    const setFeedback = (message) => {
+        const feedback = document.getElementById('show');
+        if (!feedback) return;
+        feedback.textContent = message;
+        if (message) {
+            clearTimeout(setFeedback.timeout);
+            setFeedback.timeout = setTimeout(() => {
+                feedback.textContent = '';
+            }, 4000);
+        }
+    };
 
-        // console.log(firstName,lastName,email,pass);
-          let users = {
-            firstName,
-            lastName,
-            email,
-            pass
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+            e.preventDefault();
+            signUp();
+        }
+    });
+
+    // Input rules (regular expressions)
+    const RULES = {
+        name: /^[A-Za-z\u00C0-\u00FF][A-Za-z\u00C0-\u00FF'\u2019 -]{1,29}$/,   // 2-30 letters, spaces, hyphens, apostrophes
+        email: /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/,
+        password: /^(?=.*[A-Za-z])(?=.*\d)\S{8,64}$/                              // 8-64 characters, no spaces, a letter and a number
+    };
+    const fail = (id, message) => {
+        setFeedback(message);
+        const el = document.getElementById(id);
+        el.classList.add('is-invalid');
+        el.focus();
+    };
+    document.addEventListener('input', (e) => e.target.classList.remove('is-invalid'));
+
+    const signUp = () => {
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        const pass = document.getElementById('pass').value.trim();
+
+        if (firstName === '' || lastName === '' || email === '' || pass === '') {
+            setFeedback('Please complete all fields.');
+            return;
+        }
+        if (!RULES.name.test(firstName)) return fail('firstName', 'First name: 2 to 30 letters only (spaces, - and \' are allowed).');
+        if (!RULES.name.test(lastName)) return fail('lastName', 'Last name: 2 to 30 letters only (spaces, - and \' are allowed).');
+        if (!RULES.email.test(email)) return fail('email', 'Enter a valid email address, like you@example.com.');
+        if (!RULES.password.test(pass)) return fail('pass', 'Password: 8 to 64 characters, with at least one letter and one number, and no spaces.');
+
+        const userInfo = getUsers();
+        const found = userInfo.some(user => String(user.email || '').trim().toLowerCase() === email);
+        if (found) {
+            setFeedback('An account with that email already exists.');
+            return;
         }
 
-        if(firstName.trim() === '' || lastName.trim() === '' || email.trim() === '' || pass.trim() === ''){
-            show.textContent = 'Please complete all fields.'
-            setTimeout(()=>{
-                show.textContent = ''
-            },3000)
-        }else{
-            const found = userInfo.find(user => user.email === users.email)
-            if(found){
-                show.textContent = 'An account with that email already exists.'
-                setTimeout(()=>{
-                    show.textContent = ''
-                },2000)
-            }else{
-              
-                userInfo.push(users)
-                localStorage.setItem('users', JSON.stringify(userInfo))
-                setTimeout(() => {
-            window.location.href = 'signIn.html'
-        }, 2000);
-            }
-        }
-        
-// alert('i workkkk')
-    }
+        userInfo.push({ firstName, lastName, email, pass });
+        localStorage.setItem('users', JSON.stringify(userInfo));
+        setFeedback('Account created successfully. Redirecting...');
+        setTimeout(() => {
+            window.location.href = 'signIn.html';
+        }, 1500);
+    };
 </script>
 </html>

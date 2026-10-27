@@ -29,45 +29,67 @@
                     <input type="password" id="pass" class="form-control" autocomplete="current-password" placeholder="Enter your password">
                 </div>
                 <button class="btn btn-brand auth-submit" type="button" onclick="signIn()">Sign in</button>
+                <div class="auth-divider"><span>or</span></div>
+                <button class="btn btn-outline-brand btn-google" type="button" id="google-btn"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7c-.5-1.5-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C1 16.4 0 20.1 0 24s1 7.6 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.900-5.8l-7.5-5.800c-2.100 1.400-4.800 2.3-8.400 2.300-6.300 0-11.600-4.100-13.500-9.800l-7.900 6.100C6.500 42.600 14.600 48 24 48z"/></svg>Continue with Google</button>
                 <div id="show" class="auth-feedback" aria-live="polite"></div>
                 <p class="auth-switch">New to Gbogbolowo? <a href="signUp.html">Create an account</a></p>
             </div>
         </section>
     </main>
+    <script type="module" src="js/auth.js"></script>
 </body>
 <script>
-    window.addEventListener('keypress', (e) => {
-    if (e.key == 'Enter') {
-        signIn()
-    }
-})
-    const signIn = () =>{
-        let email = document.getElementById('email').value
-        let pass = document.getElementById('pass').value
-        // console.log(email,pass);
-const userInfo = JSON.parse(localStorage.getItem('users')) || []
-        
-
-        if(email.trim() === '' || pass.trim() === ''){
-            show.textContent = 'Fill in your email and password.'
-            setTimeout(()=>{
-                show.textContent = ''
-            },2000)
-        }else{
-           
-            const found = userInfo.find(user => user.email === email && user.pass === pass)
-            if(found){
-                window.location.href  = 'index.html'
-                console.log('i work');
-                
-            }else{
-                show.textContent = 'We could not find an account with those details.'
-                setTimeout(()=>{
-                    show.textContent = ''
-                },2000)
-               
-            }
+    const getUsers = () => {
+        try {
+            const saved = JSON.parse(localStorage.getItem('users') || '[]');
+            return Array.isArray(saved) ? saved : [];
+        } catch (error) {
+            return [];
         }
-    }
+    };
+
+    const setFeedback = (message) => {
+        const feedback = document.getElementById('show');
+        if (!feedback) return;
+        feedback.textContent = message;
+        if (message) {
+            clearTimeout(setFeedback.timeout);
+            setFeedback.timeout = setTimeout(() => {
+                feedback.textContent = '';
+            }, 4000);
+        }
+    };
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+            e.preventDefault();
+            signIn();
+        }
+    });
+
+    const EMAIL_RULE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
+
+    const signIn = () => {
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        const pass = document.getElementById('pass').value.trim();
+        const userInfo = getUsers();
+
+        if (email === '' || pass === '') {
+            setFeedback('Fill in your email and password.');
+            return;
+        }
+        if (!EMAIL_RULE.test(email)) {
+            setFeedback('Enter a valid email address, like you@example.com.');
+            return;
+        }
+
+        const found = userInfo.find(user => String(user.email || '').trim().toLowerCase() === email && String(user.pass || '') === pass);
+        if (found) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        setFeedback('We could not find an account with those details.');
+    };
 </script>
 </html>
