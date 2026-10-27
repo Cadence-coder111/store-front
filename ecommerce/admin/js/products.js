@@ -8,7 +8,6 @@ await requireAdmin();
 const body = document.getElementById("products-table-body");
 const empty = document.getElementById("products-empty");
 const filterForm = document.getElementById("product-filter-form");
-const importButton = document.getElementById("import-catalog-btn");
 const importStatus = document.getElementById("import-catalog-status");
 const pillClass = { Active: "pill-ok", "Low stock": "pill-wait", "Out of stock": "pill-bad", Draft: "pill-info" };
 let all = [];
@@ -46,8 +45,7 @@ function timestamp(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-importButton.addEventListener("click", async () => {
-  importButton.disabled = true;
+async function syncStoreCatalog() {
   importStatus.textContent = "Checking the store catalogue...";
   try {
     const snapshot = await getDocs(collection(db, "products"));
@@ -67,15 +65,13 @@ importButton.addEventListener("click", async () => {
     }
 
     importStatus.textContent = imported
-      ? `Imported ${imported} missing store products.`
-      : "All store catalogue products are already in the admin list.";
+      ? `Added ${imported} missing products to the admin catalogue.`
+      : "All store catalogue products are already in the admin catalogue.";
   } catch (error) {
-    console.error("Could not import store catalogue.", error);
-    importStatus.textContent = `Import failed: ${error.message}`;
-  } finally {
-    importButton.disabled = false;
+    console.error("Could not sync store catalogue to admin products.", error);
+    importStatus.textContent = `Could not add storefront products: ${error.message}`;
   }
-});
+}
 
 onSnapshot(collection(db, "products"),
   snap => {
@@ -88,6 +84,8 @@ onSnapshot(collection(db, "products"),
     console.error(err);
     body.innerHTML = '<tr><td colspan="7" class="text-danger py-4">Could not load products. Check js/firebase-config.js and your Firestore rules.</td></tr>';
   });
+
+syncStoreCatalog();
 
 filterForm.addEventListener("submit", e => { e.preventDefault(); render(); });
 filterForm.addEventListener("input", render);
