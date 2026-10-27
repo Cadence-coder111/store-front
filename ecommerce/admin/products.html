@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Products | Gbogbolowo Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/admin.css" rel="stylesheet">
+</head>
+
+<body>
+    <aside class="sidebar collapse d-lg-block" id="sidebar"><a class="brand"
+            href="products.html">Gbogbolowo<small>Admin</small></a>
+        <div class="side-label">Catalogue</div><a class="nav-item active" href="products.html">Products</a><a
+            class="nav-item" href="product-form.html">Add product</a>
+    </aside>
+    <div class="main">
+        <header class="topbar-admin"><button class="btn btn-outline-brand btn-sm d-lg-none" data-bs-toggle="collapse"
+                data-bs-target="#sidebar" aria-label="Toggle menu">Menu</button><span class="ms-auto fw-semibold"
+                id="admin-profile">Admin</span></header>
+        <main class="content">
+            <div class="page-head">
+                <h1>Products</h1><a class="btn btn-brand" href="product-form.html" id="add-product-btn">Add product</a>
+            </div>
+            <div class="row g-3 mb-3" id="stock-summary"><!-- JS: fill these counts from Firebase -->
+                <div class="col-6 col-xl-3">
+                    <div class="card-box stat">
+                        <div class="label">Total products</div>
+                        <div class="value" id="stat-total">5</div>
+                        <div class="note">In the store</div>
+                    </div>
+                </div>
+                <div class="col-6 col-xl-3">
+                    <div class="card-box stat">
+                        <div class="label">In stock</div>
+                        <div class="value" id="stat-instock">3</div>
+                        <div class="note">Healthy stock</div>
+                    </div>
+                </div>
+                <div class="col-6 col-xl-3">
+                    <div class="card-box stat">
+                        <div class="label">Low stock</div>
+                        <div class="value" id="stat-low">1</div>
+                        <div class="note">10 or fewer left</div>
+                    </div>
+                </div>
+                <div class="col-6 col-xl-3">
+                    <div class="card-box stat">
+                        <div class="label">Out of stock</div>
+                        <div class="value" id="stat-out">1</div>
+                        <div class="note">Needs restocking</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-box">
+                <form class="row g-2 mb-3" id="product-filter-form">
+                    <div class="col-md-4"><input class="form-control" type="search" name="q"
+                            placeholder="Search products" aria-label="Search products"></div>
+                    <div class="col-6 col-md-3"><select class="form-select" name="category" aria-label="Category">
+                            <option value="">All categories</option>
+                            <option>Men</option>
+                            <option>Women</option>
+                            <option>Kids</option>
+                            <option>Shoes</option>
+                        </select></div>
+                    <div class="col-6 col-md-3"><select class="form-select" name="status" aria-label="Status">
+                            <option value="">All statuses</option>
+                            <option>Active</option>
+                            <option>Low stock</option>
+                            <option>Out of stock</option>
+                            <option>Draft</option>
+                        </select></div>
+                    <div class="col-md-2"><button class="btn btn-brand w-100" type="submit">Filter</button></div>
+                </form>
+                <div class="table-responsive">
+                    <table class="table" id="products-table">
+                        <thead>
+                            <tr>
+                                <th style="width:2rem"></th>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock left</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table-body">
+                            <!-- JS: load products from Firebase and render a row for each (keep data-product-id) -->
+                            <tr data-product-id="1">
+                                <td><input class="form-check-input" type="checkbox" aria-label="Select"></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="thumb"
+                                            style="background:url('../client/images/products/striped-polo.jpg') center/cover">
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">Striped Knit Polo</div>
+                                            <div class="small text-muted">SKU-TEE-001</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Men</td>
+                                <td>&#8358;12,000</td>
+                                <td><strong>48</strong> <span class="text-muted">left</span></td>
+                                <td><span class="pill pill-ok">Active</span></td>
+                                <td class="text-end text-nowrap"><a class="btn btn-outline-brand btn-sm"
+                                        href="product-form.html?id=1">Edit</a> <button
+                                        class="btn btn-outline-brand btn-sm" data-action="delete-product"
+                                        data-product-id="1">Delete</button></td>
+                            </tr>
+                            <tr data-product-id="2">
+                                <td><input class="form-check-input" type="checkbox" aria-label="Select"></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="thumb"
+                                            style="background:url('../client/images/products/blue-jeans.jpg') center/cover">
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">Slim Fit Jeans</div>
+                                            <div class="small text-muted">SKU-JNS-002</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Men</td>
+                                <td>&#8358;28,000</td>
+                                <td><strong>21</strong> <span class="text-muted">left</span></td>
+                                <td><span class="pill pill-ok">Active</span></td>
+                                <td class="text-end text-nowrap"><a class="btn btn-outline-brand btn-sm"
+                                        href="product-form.html?id=2">Edit</a> <button
+                                        class="btn btn-outline-brand btn-sm" data-action="delete-product"
+                                        data-product-id="2">Delete</button></td>
+                            </tr>
+                            <tr data-product-id="3">
+                                <td><input class="form-check-input" type="checkbox" aria-label="Select"></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="thumb"
+                                            style="background:url('../client/images/products/leather-casual-shoes.jpg') center/cover">
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">Leather Casual Shoes</div>
+                                            <div class="small text-muted">SKU-SNK-003</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Shoes</td>
+                                <td>&#8358;45,000</td>
+                                <td><strong>9</strong> <span class="text-muted">left</span></td>
+                                <td><span class="pill pill-wait">Low stock</span></td>
+                                <td class="text-end text-nowrap"><a class="btn btn-outline-brand btn-sm"
+                                        href="product-form.html?id=3">Edit</a> <button
+                                        class="btn btn-outline-brand btn-sm" data-action="delete-product"
+                                        data-product-id="3">Delete</button></td>
+                            </tr>
+                            <tr data-product-id="4">
+                                <td><input class="form-check-input" type="checkbox" aria-label="Select"></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="thumb"
+                                            style="background:url('../client/images/products/suede-slip-ons.jpg') center/cover">
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">Suede Slip-Ons</div>
+                                            <div class="small text-muted">SKU-SLP-004</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Shoes</td>
+                                <td>&#8358;24,000</td>
+                                <td><strong>33</strong> <span class="text-muted">left</span></td>
+                                <td><span class="pill pill-ok">Active</span></td>
+                                <td class="text-end text-nowrap"><a class="btn btn-outline-brand btn-sm"
+                                        href="product-form.html?id=4">Edit</a> <button
+                                        class="btn btn-outline-brand btn-sm" data-action="delete-product"
+                                        data-product-id="4">Delete</button></td>
+                            </tr>
+                            <tr data-product-id="5">
+                                <td><input class="form-check-input" type="checkbox" aria-label="Select"></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="thumb"></div>
+                                        <div>
+                                            <div class="fw-semibold">Ankara Shirt Dress</div>
+                                            <div class="small text-muted">SKU-DRS-005</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Women</td>
+                                <td>&#8358;32,000</td>
+                                <td><strong>0</strong> <span class="text-muted">left</span></td>
+                                <td><span class="pill pill-bad">Out of stock</span></td>
+                                <td class="text-end text-nowrap"><a class="btn btn-outline-brand btn-sm"
+                                        href="product-form.html?id=5">Edit</a> <button
+                                        class="btn btn-outline-brand btn-sm" data-action="delete-product"
+                                        data-product-id="5">Delete</button></td>
+                            </tr>
+                            <tr id="products-empty" class="d-none">
+                                <td colspan="7" class="text-center text-muted py-4">No products yet. Add your first
+                                    product.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <nav class="mt-3" aria-label="Pagination">
+                    <ul class="pagination mb-0" id="pagination">
+                        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/products.js"></script>
+</body>
+
+</html>
