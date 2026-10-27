@@ -1,5 +1,8 @@
 import { db, esc, imgSrc } from "./firebase-config.js";
+import { requireAdmin } from "./admin-session.js";
 import { collection, doc, getDoc, addDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+await requireAdmin();
 
 const form = document.getElementById("product-form");
 const alertBox = document.getElementById("form-alert");

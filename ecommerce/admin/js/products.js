@@ -1,5 +1,8 @@
 import { db, stockStatus, naira, esc, imgSrc } from "./firebase-config.js";
+import { requireAdmin } from "./admin-session.js";
 import { collection, onSnapshot, query, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+await requireAdmin();
 
 const body = document.getElementById("products-table-body");
 const empty = document.getElementById("products-empty");
