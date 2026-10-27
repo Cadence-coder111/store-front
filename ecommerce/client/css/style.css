@@ -111,3 +111,7 @@ a:hover{color:var(--accent-dark)}
 .auth-switch a:hover{color:var(--accent-dark)}
 @media (max-width:767.98px){.auth-page{padding:1.5rem 1rem 2rem}.auth-brand{margin-bottom:1.5rem}.auth-card{grid-template-columns:1fr;min-height:0}.auth-aside{padding:2rem;min-height:250px}.auth-aside h1{max-width:14ch}.auth-content{padding:2rem}}
 @media (max-width:420px){.auth-content h2{font-size:2rem}}
+
+.auth-divider{display:flex;align-items:center;gap:.8rem;color:var(--muted);font-size:.8rem;margin:1rem 0}
+.auth-divider::before,.auth-divider::after{content:"";flex:1;border-top:1px solid var(--line)}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%}
