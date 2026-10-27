@@ -36,38 +36,51 @@
     </main>
 </body>
 <script>
-    window.addEventListener('keypress', (e) => {
-    if (e.key == 'Enter') {
-        signIn()
-    }
-})
-    const signIn = () =>{
-        let email = document.getElementById('email').value
-        let pass = document.getElementById('pass').value
-        // console.log(email,pass);
-const userInfo = JSON.parse(localStorage.getItem('users')) || []
-        
-
-        if(email.trim() === '' || pass.trim() === ''){
-            show.textContent = 'Fill in your email and password.'
-            setTimeout(()=>{
-                show.textContent = ''
-            },2000)
-        }else{
-           
-            const found = userInfo.find(user => user.email === email && user.pass === pass)
-            if(found){
-                window.location.href  = 'index.html'
-                console.log('i work');
-                
-            }else{
-                show.textContent = 'We could not find an account with those details.'
-                setTimeout(()=>{
-                    show.textContent = ''
-                },2000)
-               
-            }
+    const getUsers = () => {
+        try {
+            const saved = JSON.parse(localStorage.getItem('users') || '[]');
+            return Array.isArray(saved) ? saved : [];
+        } catch (error) {
+            return [];
         }
-    }
+    };
+
+    const setFeedback = (message) => {
+        const feedback = document.getElementById('show');
+        if (!feedback) return;
+        feedback.textContent = message;
+        if (message) {
+            clearTimeout(setFeedback.timeout);
+            setFeedback.timeout = setTimeout(() => {
+                feedback.textContent = '';
+            }, 2000);
+        }
+    };
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+            e.preventDefault();
+            signIn();
+        }
+    });
+
+    const signIn = () => {
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        const pass = document.getElementById('pass').value.trim();
+        const userInfo = getUsers();
+
+        if (email === '' || pass === '') {
+            setFeedback('Fill in your email and password.');
+            return;
+        }
+
+        const found = userInfo.find(user => String(user.email || '').trim().toLowerCase() === email && String(user.pass || '') === pass);
+        if (found) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        setFeedback('We could not find an account with those details.');
+    };
 </script>
 </html>

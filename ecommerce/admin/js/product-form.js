@@ -8,12 +8,23 @@ const saveBtn = document.getElementById("save-product");
 const id = new URLSearchParams(location.search).get("id");
 
 const links = () => form.elements["images"].value.split("\n").map(x => x.trim()).filter(Boolean);
-const checked = n => [...form.querySelectorAll(`input[name="${n}"]:checked`)].map(i => i.value);
+const checked = n => [...form.querySelectorAll(`input[name="${n}"]:checked:not(:disabled)`)].map(i => i.value);
 const tick = (n, vals) => form.querySelectorAll(`input[name="${n}"]`).forEach(i => { i.checked = vals.includes(i.value); });
 const showImages = urls => { preview.innerHTML = urls.map(u => `<div class="col-3"><div class="thumb w-100" style="height:90px;background:url('${esc(imgSrc(u))}') center/cover"></div></div>`).join(""); };
 const msg = (text, ok = true) => { alertBox.textContent = text; alertBox.className = "alert " + (ok ? "alert-success" : "alert-danger"); };
+const updateSizeOptions = () => {
+  const isShoe = form.elements["category"].value === "Shoes";
+  const clothingGroup = form.querySelector('input[name="sizes"]').closest(".mb-3");
+  const shoeGroup = form.querySelector('input[name="shoe_sizes"]').closest(".mb-3");
+  clothingGroup.classList.toggle("d-none", isShoe);
+  shoeGroup.classList.toggle("d-none", !isShoe);
+  form.querySelectorAll('input[name="sizes"]').forEach(input => { input.disabled = isShoe; });
+  form.querySelectorAll('input[name="shoe_sizes"]').forEach(input => { input.disabled = !isShoe; });
+};
 
 form.elements["images"].addEventListener("input", () => showImages(links()));
+form.elements["category"].addEventListener("change", updateSizeOptions);
+updateSizeOptions();
 
 // Edit mode: product-form.html?id=PRODUCT_ID
 if (id) {
@@ -29,6 +40,7 @@ if (id) {
       set("colours", (p.colours || []).join(", ")); set("seo_title", p.seoTitle); set("seo_description", p.seoDescription);
       set("images", (p.images || []).join("\n"));
       tick("sizes", p.sizes || []); tick("shoe_sizes", p.shoeSizes || []);
+      updateSizeOptions();
       showImages(p.images || []);
     }
   } catch (err) { msg("Could not load product: " + err.message, false); }

@@ -46,50 +46,63 @@
     </main>
 </body>
 <script>
-    window.addEventListener('keypress', (e) => {
-    if (e.key == 'Enter') {
-        signUp()
-    }
-})
-    const userInfo = JSON.parse(localStorage.getItem('users')) || []
+    const getUsers = () => {
+        try {
+            const saved = JSON.parse(localStorage.getItem('users') || '[]');
+            return Array.isArray(saved) ? saved : [];
+        } catch (error) {
+            return [];
+        }
+    };
 
-    const signUp = () =>{
-        let firstName = document.getElementById('firstName').value
-        let lastName = document.getElementById('lastName').value
-        let email = document.getElementById('email').value
-        let pass = document.getElementById('pass').value
+    const setFeedback = (message) => {
+        const feedback = document.getElementById('show');
+        if (!feedback) return;
+        feedback.textContent = message;
+        if (message) {
+            clearTimeout(setFeedback.timeout);
+            setFeedback.timeout = setTimeout(() => {
+                feedback.textContent = '';
+            }, 2000);
+        }
+    };
 
-        // console.log(firstName,lastName,email,pass);
-          let users = {
-            firstName,
-            lastName,
-            email,
-            pass
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+            e.preventDefault();
+            signUp();
+        }
+    });
+
+    const signUp = () => {
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        const pass = document.getElementById('pass').value.trim();
+
+        if (firstName === '' || lastName === '' || email === '' || pass === '') {
+            setFeedback('Please complete all fields.');
+            return;
         }
 
-        if(firstName.trim() === '' || lastName.trim() === '' || email.trim() === '' || pass.trim() === ''){
-            show.textContent = 'Please complete all fields.'
-            setTimeout(()=>{
-                show.textContent = ''
-            },3000)
-        }else{
-            const found = userInfo.find(user => user.email === users.email)
-            if(found){
-                show.textContent = 'An account with that email already exists.'
-                setTimeout(()=>{
-                    show.textContent = ''
-                },2000)
-            }else{
-              
-                userInfo.push(users)
-                localStorage.setItem('users', JSON.stringify(userInfo))
-                setTimeout(() => {
-            window.location.href = 'signIn.html'
-        }, 2000);
-            }
+        if (pass.length < 6) {
+            setFeedback('Password must be at least 6 characters long.');
+            return;
         }
-        
-// alert('i workkkk')
-    }
+
+        const userInfo = getUsers();
+        const found = userInfo.some(user => String(user.email || '').trim().toLowerCase() === email);
+        if (found) {
+            setFeedback('An account with that email already exists.');
+            return;
+        }
+
+        userInfo.push({ firstName, lastName, email, pass });
+        localStorage.setItem('users', JSON.stringify(userInfo));
+        setFeedback('Account created successfully. Redirecting...');
+        setTimeout(() => {
+            window.location.href = 'signIn.html';
+        }, 1500);
+    };
 </script>
 </html>
