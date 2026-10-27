@@ -1,5 +1,5 @@
 import { db, esc, naira, PAYSTACK_KEY } from "./firebase.js";
-import { collection, getDocs, query, orderBy, addDoc, updateDoc, doc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { collection, getDocs, addDoc, updateDoc, doc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = s => document.querySelector(s);
 const img = (src, alt) => src ? `<img class="card-img" src="${esc(src)}" alt="${esc(alt)}">` : "Image";
@@ -93,8 +93,15 @@ let productsError;
 async function products() {
   if (!cache) {
     try {
-      const snap = await getDocs(query(collection(db, "products"), orderBy("createdAt", "desc")));
-      cache = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(p => p.status !== "Draft");
+      const snap = await getDocs(collection(db, "products"));
+      const createdAt = value => {
+        if (value && typeof value.toMillis === "function") return value.toMillis();
+        const time = value instanceof Date ? value.getTime() : Date.parse(value);
+        return Number.isFinite(time) ? time : 0;
+      };
+      cache = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        .filter(p => p.status !== "Draft")
+        .sort((a, b) => createdAt(b.createdAt) - createdAt(a.createdAt));
     } catch (err) {
       productsError = err;
       throw err;
@@ -112,13 +119,13 @@ const grid = (sel, list) => { const el = $(sel); if (el) el.innerHTML = list.len
 async function loadPage() {
   try {
     const all = await products();
-    if ($("#new-arrivals")) {
+    if ($("#new-arrivals") && all.length) {
       grid("#new-arrivals", all.slice(0, 4));
       const more = all.slice(4, 8);
       grid("#best-sellers", more);
       if (!more.length) $("#best-sellers").closest("section").classList.add("d-none");
     }
-    if ($("#product-grid")) {
+    if ($("#product-grid") && all.length) {
       const cat = (new URLSearchParams(location.search).get("cat") || "").toLowerCase();
       const list = ["men", "women", "kids", "shoes"].includes(cat) ? all.filter(p => (p.category || "").toLowerCase() === cat) : all;
       grid("#product-grid", list);
