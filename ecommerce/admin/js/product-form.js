@@ -26,7 +26,7 @@ form.elements["images"].addEventListener("input", () => showImages(links()));
 form.elements["category"].addEventListener("change", updateSizeOptions);
 updateSizeOptions();
 
-// Edit mode: product-form.html?id=PRODUCT_ID
+
 if (id) {
   document.querySelector(".page-head h1").textContent = "Edit product";
   form.dataset.mode = "edit";

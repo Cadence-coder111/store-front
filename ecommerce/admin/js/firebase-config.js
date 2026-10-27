@@ -1,4 +1,4 @@
-// Paste your own Firebase settings below (Firebase console > Project settings > Your apps > Web app).
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -14,7 +14,7 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 
-export const LOW_STOCK = 10; // "Low stock" means this many or fewer left
+export const LOW_STOCK = 10; 
 
 export function stockStatus(p) {
   if (p.status === "Draft") return "Draft";
@@ -26,5 +26,5 @@ export function stockStatus(p) {
 export const naira = n => "\u20A6" + Number(n || 0).toLocaleString("en-NG");
 export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-// Image links: a full https link, or a path inside client/ such as images/products/striped-polo.jpg
+
 export const imgSrc = u => /^(https?:|data:)/.test(u) ? u : "../client/" + u;

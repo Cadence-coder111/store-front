@@ -1,13 +1,12 @@
-// Google sign in / sign up (Firebase Authentication)
+
 import "./firebase.js"; // starts Firebase with your project settings
 import { getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-<<<<<<< HEAD
 import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const auth = getAuth(getApp());
 const keep = user => localStorage.setItem("gb_user", JSON.stringify({ uid: user.uid, name: user.displayName || "", email: user.email || "", photo: user.photoURL || "" }));
 
-// Email + password accounts (used by signUp.html and signIn.html)
+
 window.gbAuth = {
   async signUp(first, last, email, pass) {
     const { user } = await createUserWithEmailAndPassword(auth, email, pass);
@@ -21,9 +20,6 @@ window.gbAuth = {
     return user;
   }
 };
-=======
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
->>>>>>> b275ed2824133065ce0cf66238b6d092684efdad
 
 const btn = document.getElementById("google-btn");
 const show = m => { const el = document.getElementById("show"); if (el) el.textContent = m; };
@@ -40,13 +36,8 @@ const problems = {
 btn?.addEventListener("click", async () => {
   btn.disabled = true; show("");
   try {
-<<<<<<< HEAD
     const { user } = await signInWithPopup(auth, new GoogleAuthProvider());
     keep(user);
-=======
-    const { user } = await signInWithPopup(getAuth(getApp()), new GoogleAuthProvider());
-    localStorage.setItem("gb_user", JSON.stringify({ uid: user.uid, name: user.displayName || "", email: user.email || "", photo: user.photoURL || "" }));
->>>>>>> b275ed2824133065ce0cf66238b6d092684efdad
     show("Signed in as " + (user.displayName || user.email) + ". Redirecting...");
     setTimeout(() => { location.href = "index.html"; }, 1000);
   } catch (err) {

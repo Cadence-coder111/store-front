@@ -34,7 +34,7 @@ function summary() {
   set("stat-total", all.length); set("stat-instock", c.Active); set("stat-low", c["Low stock"]); set("stat-out", c["Out of stock"]);
 }
 
-// Live list: updates by itself whenever products change in Firestore
+
 onSnapshot(query(collection(db, "products"), orderBy("createdAt", "desc")),
   snap => { all = snap.docs.map(d => ({ id: d.id, ...d.data() })); summary(); render(); },
   err => {

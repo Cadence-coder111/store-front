@@ -36,11 +36,7 @@
                     <div class="col-12 auth-field">
                         <label for="pass" class="form-label">Password</label>
                         <input type="password" id="pass" class="form-control" autocomplete="new-password" placeholder="Create a password">
-<<<<<<< HEAD
-                        <div class="form-text">At least 6 characters, with no spaces.</div>
-=======
                         <div class="form-text">At least 8 characters, with a letter and a number.</div>
->>>>>>> b275ed2824133065ce0cf66238b6d092684efdad
                     </div>
                 </div>
                 <button class="btn btn-brand auth-submit" type="button" onclick="signUp()">Create account</button>
@@ -71,15 +67,7 @@
             clearTimeout(setFeedback.timeout);
             setFeedback.timeout = setTimeout(() => {
                 feedback.textContent = '';
-<<<<<<< HEAD
-            }, 6000);
-=======
-<<<<<<< HEAD
             }, 4000);
-=======
-            }, 2000);
->>>>>>> 37cef89e8544fd16b2f9584592750712fc1d1c52
->>>>>>> b275ed2824133065ce0cf66238b6d092684efdad
         }
     };
 
@@ -90,19 +78,11 @@
         }
     });
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> b275ed2824133065ce0cf66238b6d092684efdad
-    // Input rules (regular expressions)
+    
     const RULES = {
         name: /^[A-Za-z\u00C0-\u00FF][A-Za-z\u00C0-\u00FF'\u2019 -]{1,29}$/,   // 2-30 letters, spaces, hyphens, apostrophes
         email: /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/,
-<<<<<<< HEAD
-        password: /^\S{6,64}$/                                                   // 6-64 characters, no spaces
-=======
-        password: /^(?=.*[A-Za-z])(?=.*\d)\S{8,64}$/                              // 8-64 characters, no spaces, a letter and a number
->>>>>>> b275ed2824133065ce0cf66238b6d092684efdad
+        password: /^(?=.*[A-Za-z])(?=.*\d)\S{8,64}$/                              
     };
     const fail = (id, message) => {
         setFeedback(message);
@@ -112,13 +92,7 @@
     };
     document.addEventListener('input', (e) => e.target.classList.remove('is-invalid'));
 
-<<<<<<< HEAD
     const signUp = async () => {
-=======
-=======
->>>>>>> 37cef89e8544fd16b2f9584592750712fc1d1c52
-    const signUp = () => {
->>>>>>> b275ed2824133065ce0cf66238b6d092684efdad
         const firstName = document.getElementById('firstName').value.trim();
         const lastName = document.getElementById('lastName').value.trim();
         const email = document.getElementById('email').value.trim().toLowerCase();
@@ -127,19 +101,11 @@
         if (firstName === '' || lastName === '' || email === '' || pass === '') {
             setFeedback('Please complete all fields.');
             return;
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> b275ed2824133065ce0cf66238b6d092684efdad
         }
         if (!RULES.name.test(firstName)) return fail('firstName', 'First name: 2 to 30 letters only (spaces, - and \' are allowed).');
         if (!RULES.name.test(lastName)) return fail('lastName', 'Last name: 2 to 30 letters only (spaces, - and \' are allowed).');
         if (!RULES.email.test(email)) return fail('email', 'Enter a valid email address, like you@example.com.');
-<<<<<<< HEAD
-        if (!RULES.password.test(pass)) return fail('pass', 'Password: at least 6 characters, with no spaces.');
-=======
         if (!RULES.password.test(pass)) return fail('pass', 'Password: 8 to 64 characters, with at least one letter and one number, and no spaces.');
->>>>>>> b275ed2824133065ce0cf66238b6d092684efdad
 
         const userInfo = getUsers();
         const found = userInfo.some(user => String(user.email || '').trim().toLowerCase() === email);
@@ -148,7 +114,6 @@
             return;
         }
 
-<<<<<<< HEAD
         if (window.gbAuth) {
             setFeedback('Creating your account...');
             try {
@@ -161,29 +126,11 @@
                     setFeedback('An account with that email already exists. Try signing in.');
                     return;
                 }
-                // Any other problem (for example email sign-up not switched on in Firebase yet): save on this device instead
+               
                 console.error(err);
             }
         }
 
-=======
-=======
-        }
-
-        if (pass.length < 6) {
-            setFeedback('Password must be at least 6 characters long.');
-            return;
-        }
-
-        const userInfo = getUsers();
-        const found = userInfo.some(user => String(user.email || '').trim().toLowerCase() === email);
-        if (found) {
-            setFeedback('An account with that email already exists.');
-            return;
-        }
-
->>>>>>> 37cef89e8544fd16b2f9584592750712fc1d1c52
->>>>>>> b275ed2824133065ce0cf66238b6d092684efdad
         userInfo.push({ firstName, lastName, email, pass });
         localStorage.setItem('users', JSON.stringify(userInfo));
         setFeedback('Account created successfully. Redirecting...');

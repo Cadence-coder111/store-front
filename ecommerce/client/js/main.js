@@ -1,10 +1,7 @@
 import { db, esc, naira, PAYSTACK_KEY } from "./firebase.js";
 import { collection, getDocs, addDoc, updateDoc, doc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* ---------- Built-in products (edit names/prices/stock here) ---------- */
-// Built-in products shown on the Men / Women / Kids / Shoes pages.
-// Products you add in the admin page (Firestore) show first; these fill in after them.
-// To change a name, price or stock, just edit it here. To add a product, copy a line.
+
 const P = "images/products/";
 const CLOTHES = ["S", "M", "L", "XL"];
 const KIDS = ["2-3Y", "4-5Y", "6-7Y", "8-9Y"];
@@ -55,7 +52,7 @@ const shoes = [
   item("white-stripe-sneakers.jpg", "White Stripe Sneakers", "Shoes", 35000, MEN_SHOES, "Classic white sneakers with black stripes.")
 ];
 
-// Mix the categories so "New arrivals" on the home page shows a bit of everything.
+
 const lists = [men, women, kids, shoes], longest = Math.max(...lists.map(l => l.length));
 const CATALOG = [];
 for (let i = 0; i < longest; i++) lists.forEach(l => l[i] && CATALOG.push(l[i]));
@@ -64,7 +61,7 @@ const $ = s => document.querySelector(s);
 const img = (src, alt) => src ? `<img class="card-img" src="${esc(src)}" alt="${esc(alt)}">` : "Image";
 const openCart = () => window.bootstrap && bootstrap.Offcanvas.getOrCreateInstance("#miniCart").show();
 
-/* ---------- Cart (kept in the browser) ---------- */
+
 let cart = [];
 try {
   const savedCart = JSON.parse(localStorage.getItem("gb_cart"));
@@ -146,7 +143,7 @@ document.addEventListener("change", e => {
   save();
 });
 
-/* ---------- Products from Firebase ---------- */
+
 let cache;
 let productsError;
 async function products() {
@@ -163,7 +160,7 @@ async function products() {
         .filter(p => p.status !== "Draft")
         .sort((a, b) => createdAt(b.createdAt) - createdAt(a.createdAt));
     } catch (err) { productsError = err; console.error(err); }
-    // built-in products come after live ones (skipping any picture a live product already uses)
+  
     const used = new Set(live.flatMap(p => p.images || []));
     cache = [...live, ...CATALOG.filter(p => !used.has(p.images[0]))];
   }
@@ -195,7 +192,7 @@ function paint(all) {
 }
 
 async function loadPage() {
-  paint(CATALOG); // show the built-in products straight away, then add live ones when Firestore answers
+  paint(CATALOG);
   try {
     const all = await products();
     paint(all);
@@ -254,7 +251,7 @@ function showProduct(all) {
   if (!related.length) { $("#related-products").previousElementSibling.classList.add("d-none"); $("#related-products").classList.add("d-none"); }
 }
 
-/* ---------- Checkout ---------- */
+
 const form = $("#checkout-form");
 function drawCheckout() {
   if (!form || !$("#checkout-items")) return; // skip once the thank-you message has replaced the page
@@ -267,7 +264,7 @@ function drawCheckout() {
   $("#place-order").textContent = online ? "Pay with Paystack" : "Place order";
 }
 
-// Opens the Paystack popup. Paystack wants the amount in kobo (naira x 100).
+
 function payWithPaystack(email, amount, onPaid, onCancel) {
   if (!window.PaystackPop) { alert("Paystack did not load. Check your internet connection."); return onCancel(); }
   PaystackPop.setup({
@@ -286,7 +283,7 @@ async function saveOrder(extra) {
     subtotal: subtotal(), total: subtotal(),
     status: "Pending", createdAt: serverTimestamp(), ...extra
   });
-  // take the sold items off the stock shown in the admin
+  
   await Promise.all(items.map(i => updateDoc(doc(db, "products", i.id), { stock: increment(-i.qty) }).catch(() => { })));
   cart = []; localStorage.removeItem("gb_cart");
   const paid = extra.paymentStatus === "Paid";
