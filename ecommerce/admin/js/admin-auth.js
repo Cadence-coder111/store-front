@@ -1,4 +1,4 @@
-import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { app } from "./firebase-config.js";
 import { ADMIN_EMAIL } from "./admin-session.js";
 
@@ -46,14 +46,7 @@ signInForm?.addEventListener("submit", async event => {
   button.disabled = true;
   show("Signing in...");
   try {
-    const { user } = await signInWithEmailAndPassword(auth, email, password);
-    if (!user.emailVerified) {
-      await sendEmailVerification(user);
-      await signOut(auth);
-      show("Verify your email using the link we sent, then sign in again.", true);
-      button.disabled = false;
-      return;
-    }
+    await signInWithEmailAndPassword(auth, email, password);
     window.location.replace("products.html");
   } catch (error) {
     console.error("Admin sign-in failed.", error);
@@ -86,10 +79,8 @@ signUpForm?.addEventListener("submit", async event => {
   button.disabled = true;
   show("Creating your admin account...");
   try {
-    const { user } = await createUserWithEmailAndPassword(auth, email, password);
-    await sendEmailVerification(user);
-    await signOut(auth);
-    show("Account created. Verify your email using the link we sent, then sign in.");
+    await createUserWithEmailAndPassword(auth, email, password);
+    show("Admin account created. You can now sign in.");
     signUpForm.reset();
   } catch (error) {
     console.error("Admin account setup failed.", error);

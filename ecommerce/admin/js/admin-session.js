@@ -1,7 +1,7 @@
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { app } from "./firebase-config.js";
 
-export const ADMIN_EMAIL = "adminEnd@gmail.com";
+export const ADMIN_EMAIL = "taofeeksherif66@mail.com";
 const auth = getAuth(app);
 
 function currentUser() {
@@ -23,7 +23,7 @@ function currentUser() {
 
 export async function requireAdmin() {
   const user = await currentUser();
-  const isAllowed = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && user.emailVerified;
+  const isAllowed = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
   if (!isAllowed) {
     if (user) await signOut(auth);
