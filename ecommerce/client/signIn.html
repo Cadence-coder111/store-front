@@ -45,6 +45,7 @@
             return Array.isArray(saved) ? saved : [];
         } catch (error) {
             return [];
+<<<<<<< HEAD
         }
     };
 
@@ -109,6 +110,63 @@
         }
 
         setFeedback('We could not find an account with those details. If you signed up with Google, use the Google button.');
+=======
+        }
+    };
+
+    const setFeedback = (message) => {
+        const feedback = document.getElementById('show');
+        if (!feedback) return;
+        feedback.textContent = message;
+        if (message) {
+            clearTimeout(setFeedback.timeout);
+            setFeedback.timeout = setTimeout(() => {
+                feedback.textContent = '';
+<<<<<<< HEAD
+            }, 4000);
+=======
+            }, 2000);
+>>>>>>> 37cef89e8544fd16b2f9584592750712fc1d1c52
+        }
+    };
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+            e.preventDefault();
+            signIn();
+        }
+    });
+
+<<<<<<< HEAD
+    const EMAIL_RULE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
+
+=======
+>>>>>>> 37cef89e8544fd16b2f9584592750712fc1d1c52
+    const signIn = () => {
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        const pass = document.getElementById('pass').value.trim();
+        const userInfo = getUsers();
+
+        if (email === '' || pass === '') {
+            setFeedback('Fill in your email and password.');
+            return;
+        }
+<<<<<<< HEAD
+        if (!EMAIL_RULE.test(email)) {
+            setFeedback('Enter a valid email address, like you@example.com.');
+            return;
+        }
+=======
+>>>>>>> 37cef89e8544fd16b2f9584592750712fc1d1c52
+
+        const found = userInfo.find(user => String(user.email || '').trim().toLowerCase() === email && String(user.pass || '') === pass);
+        if (found) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        setFeedback('We could not find an account with those details.');
+>>>>>>> b275ed2824133065ce0cf66238b6d092684efdad
     };
 </script>
 </html>
