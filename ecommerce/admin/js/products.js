@@ -1,7 +1,7 @@
 import { db, stockStatus, naira, esc, imgSrc } from "./firebase-config.js";
 import { requireAdmin } from "./admin-session.js";
 import { CATALOG } from "./store-catalog.js";
-import { collection, onSnapshot, getDocs, getDoc, setDoc, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { collection, onSnapshot, getDocs, getDoc, writeBatch, doc, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 await requireAdmin();
 
@@ -12,14 +12,37 @@ const importStatus = document.getElementById("import-catalog-status");
 const pillClass = { Active: "pill-ok", "Low stock": "pill-wait", "Out of stock": "pill-bad", Draft: "pill-info" };
 let all = [];
 
+function catalogMatch(product, item) {
+  return product.id === item.id ||
+    String(product.name || "").trim().toLowerCase() === item.name.toLowerCase() ||
+    (Array.isArray(product.images) ? product.images : []).includes(item.images[0]);
+}
+
+function mergeProducts(firestoreProducts) {
+  const matchedIds = new Set();
+  const catalogProducts = CATALOG.map(item => {
+    const saved = firestoreProducts.find(product => catalogMatch(product, item));
+    if (!saved) return { ...item, catalogOnly: true };
+    matchedIds.add(saved.id);
+    return { ...item, ...saved, catalogOnly: false };
+  });
+  return [
+    ...catalogProducts,
+    ...firestoreProducts.filter(product => !matchedIds.has(product.id))
+  ].sort((a, b) => timestamp(b.createdAt) - timestamp(a.createdAt));
+}
+
 function row(p) {
   const s = stockStatus(p), img = p.images && p.images[0];
+  const actions = p.catalogOnly
+    ? `<button class="btn btn-brand btn-sm" data-action="save-catalog-product" data-catalog-id="${esc(p.id)}">Save to admin</button>`
+    : `<a class="btn btn-outline-brand btn-sm" href="product-form.html?id=${encodeURIComponent(p.id)}">Edit</a> <button class="btn btn-outline-brand btn-sm" data-action="delete-product" data-product-id="${esc(p.id)}">Delete</button>`;
   return `<tr data-product-id="${esc(p.id)}"><td><input class="form-check-input" type="checkbox" aria-label="Select"></td>
 <td><div class="d-flex align-items-center gap-3"><div class="thumb" ${img ? `style="background:url('${esc(imgSrc(img))}') center/cover"` : ""}></div><div><div class="fw-semibold">${esc(p.name)}</div><div class="small text-muted">${esc(p.sku)}</div></div></div></td>
 <td>${esc(p.category)}</td><td>${naira(p.price)}</td>
 <td><strong>${Number(p.stock) || 0}</strong> <span class="text-muted">left</span></td>
 <td><span class="pill ${pillClass[s]}">${s}</span></td>
-<td class="text-end text-nowrap"><a class="btn btn-outline-brand btn-sm" href="product-form.html?id=${encodeURIComponent(p.id)}">Edit</a> <button class="btn btn-outline-brand btn-sm" data-action="delete-product" data-product-id="${esc(p.id)}">Delete</button></td></tr>`;
+<td class="text-end text-nowrap">${actions}</td></tr>`;
 }
 
 function render() {
@@ -45,52 +68,98 @@ function timestamp(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function showSyncStatus(message, isError = false) {
+  importStatus.textContent = message;
+  importStatus.classList.toggle("text-danger", isError);
+  importStatus.classList.toggle("text-success", !isError);
+}
+
 async function syncStoreCatalog() {
-  importStatus.textContent = "Checking the store catalogue...";
+  showSyncStatus("Syncing the store catalogue...");
   try {
     const snapshot = await getDocs(collection(db, "products"));
-    const existing = snapshot.docs.map(product => product.data());
-    const missing = CATALOG.filter(item => !existing.some(product =>
-      (product.name || "").trim().toLowerCase() === item.name.toLowerCase() ||
-      (Array.isArray(product.images) ? product.images : []).includes(item.images[0])
-    ));
+    const existing = snapshot.docs.map(product => ({ id: product.id, ...product.data() }));
+    const missing = CATALOG.filter(item => !existing.some(product => catalogMatch(product, item)));
 
-    let imported = 0;
-    for (const item of missing) {
-      const ref = doc(db, "products", item.id);
-      if ((await getDoc(ref)).exists()) continue;
-      const { id, ...data } = item;
-      await setDoc(ref, { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-      imported++;
+    if (missing.length) {
+      const batch = writeBatch(db);
+      for (const item of missing) {
+        const { id, ...data } = item;
+        batch.set(doc(db, "products", id), {
+          ...data,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      }
+      await batch.commit();
+    }
+    if (missing.length) {
+      const savedSnapshot = await getDocs(collection(db, "products"));
+      all = mergeProducts(savedSnapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+      summary();
+      render();
     }
 
-    importStatus.textContent = imported
-      ? `Added ${imported} missing products to the admin catalogue.`
-      : "All store catalogue products are already in the admin catalogue.";
+    showSyncStatus(missing.length
+      ? `Added ${missing.length} missing products to the admin catalogue.`
+      : "All store catalogue products are already in the admin catalogue.");
+    return true;
   } catch (error) {
     console.error("Could not sync store catalogue to admin products.", error);
-    importStatus.textContent = `Could not add storefront products: ${error.message}`;
+    const code = error.code ? ` (${error.code})` : "";
+    showSyncStatus(`Could not sync storefront products${code}: ${error.message}`, true);
+    return false;
   }
 }
 
-onSnapshot(collection(db, "products"),
-  snap => {
-    all = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => timestamp(b.createdAt) - timestamp(a.createdAt));
-    summary();
-    render();
-  },
-  err => {
-    console.error(err);
-    body.innerHTML = '<tr><td colspan="7" class="text-danger py-4">Could not load products. Check js/firebase-config.js and your Firestore rules.</td></tr>';
-  });
+function listenForProducts() {
+  onSnapshot(collection(db, "products"),
+    snap => {
+      all = mergeProducts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      summary();
+      render();
+    },
+    err => {
+      console.error("Could not load admin products.", err);
+      const code = err.code ? ` (${err.code})` : "";
+      showSyncStatus(`Showing the storefront catalogue. Firestore products could not be loaded${code}: ${err.message}`, true);
+    });
+}
 
-syncStoreCatalog();
+all = mergeProducts([]);
+summary();
+render();
+
+syncStoreCatalog().finally(listenForProducts);
 
 filterForm.addEventListener("submit", e => { e.preventDefault(); render(); });
 filterForm.addEventListener("input", render);
 
 body.addEventListener("click", async e => {
+  const saveButton = e.target.closest('[data-action="save-catalog-product"]');
+  if (saveButton) {
+    const product = all.find(item => item.id === saveButton.dataset.catalogId && item.catalogOnly);
+    if (!product) return;
+    saveButton.disabled = true;
+    try {
+      const { id, catalogOnly, ...data } = product;
+      const ref = doc(db, "products", id);
+      const existing = await getDoc(ref);
+      await setDoc(ref, {
+        ...data,
+        ...(existing.exists() ? {} : { createdAt: serverTimestamp() }),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      showSyncStatus(`Saved "${product.name}" to the admin catalogue.`);
+    } catch (error) {
+      console.error("Could not save catalogue product.", error);
+      const code = error.code ? ` (${error.code})` : "";
+      showSyncStatus(`Could not save "${product.name}"${code}: ${error.message}`, true);
+      saveButton.disabled = false;
+    }
+    return;
+  }
+
   const b = e.target.closest('[data-action="delete-product"]');
   if (!b) return;
   const p = all.find(x => x.id === b.dataset.productId);
