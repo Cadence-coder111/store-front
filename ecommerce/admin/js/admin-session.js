@@ -1,7 +1,7 @@
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { app } from "./firebase-config.js";
 
-export const ADMIN_EMAIL = "taofeeksherif66@mail.com";
+export const ADMIN_EMAIL = "admin@gmail.com";
 const auth = getAuth(app);
 
 function currentUser() {
