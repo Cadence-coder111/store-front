@@ -1,6 +1,6 @@
 import { db, stockStatus, naira, esc, imgSrc } from "./firebase-config.js";
 import { requireAdmin } from "./admin-session.js";
-import { CATALOG } from "../../client/js/catalog.js";
+import { CATALOG } from "./store-catalog.js";
 import { collection, onSnapshot, getDocs, getDoc, setDoc, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 await requireAdmin();
