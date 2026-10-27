@@ -56,7 +56,11 @@
             clearTimeout(setFeedback.timeout);
             setFeedback.timeout = setTimeout(() => {
                 feedback.textContent = '';
+<<<<<<< HEAD
             }, 4000);
+=======
+            }, 2000);
+>>>>>>> 37cef89e8544fd16b2f9584592750712fc1d1c52
         }
     };
 
@@ -67,8 +71,11 @@
         }
     });
 
+<<<<<<< HEAD
     const EMAIL_RULE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
 
+=======
+>>>>>>> 37cef89e8544fd16b2f9584592750712fc1d1c52
     const signIn = () => {
         const email = document.getElementById('email').value.trim().toLowerCase();
         const pass = document.getElementById('pass').value.trim();
@@ -78,10 +85,13 @@
             setFeedback('Fill in your email and password.');
             return;
         }
+<<<<<<< HEAD
         if (!EMAIL_RULE.test(email)) {
             setFeedback('Enter a valid email address, like you@example.com.');
             return;
         }
+=======
+>>>>>>> 37cef89e8544fd16b2f9584592750712fc1d1c52
 
         const found = userInfo.find(user => String(user.email || '').trim().toLowerCase() === email && String(user.pass || '') === pass);
         if (found) {

@@ -67,7 +67,11 @@
             clearTimeout(setFeedback.timeout);
             setFeedback.timeout = setTimeout(() => {
                 feedback.textContent = '';
+<<<<<<< HEAD
             }, 4000);
+=======
+            }, 2000);
+>>>>>>> 37cef89e8544fd16b2f9584592750712fc1d1c52
         }
     };
 
@@ -78,6 +82,7 @@
         }
     });
 
+<<<<<<< HEAD
     // Input rules (regular expressions)
     const RULES = {
         name: /^[A-Za-z\u00C0-\u00FF][A-Za-z\u00C0-\u00FF'\u2019 -]{1,29}$/,   // 2-30 letters, spaces, hyphens, apostrophes
@@ -92,6 +97,8 @@
     };
     document.addEventListener('input', (e) => e.target.classList.remove('is-invalid'));
 
+=======
+>>>>>>> 37cef89e8544fd16b2f9584592750712fc1d1c52
     const signUp = () => {
         const firstName = document.getElementById('firstName').value.trim();
         const lastName = document.getElementById('lastName').value.trim();
@@ -101,6 +108,7 @@
         if (firstName === '' || lastName === '' || email === '' || pass === '') {
             setFeedback('Please complete all fields.');
             return;
+<<<<<<< HEAD
         }
         if (!RULES.name.test(firstName)) return fail('firstName', 'First name: 2 to 30 letters only (spaces, - and \' are allowed).');
         if (!RULES.name.test(lastName)) return fail('lastName', 'Last name: 2 to 30 letters only (spaces, - and \' are allowed).');
@@ -114,6 +122,22 @@
             return;
         }
 
+=======
+        }
+
+        if (pass.length < 6) {
+            setFeedback('Password must be at least 6 characters long.');
+            return;
+        }
+
+        const userInfo = getUsers();
+        const found = userInfo.some(user => String(user.email || '').trim().toLowerCase() === email);
+        if (found) {
+            setFeedback('An account with that email already exists.');
+            return;
+        }
+
+>>>>>>> 37cef89e8544fd16b2f9584592750712fc1d1c52
         userInfo.push({ firstName, lastName, email, pass });
         localStorage.setItem('users', JSON.stringify(userInfo));
         setFeedback('Account created successfully. Redirecting...');
